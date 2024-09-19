@@ -28,15 +28,22 @@
 
         socket.on('content', (textContent) => {
             if (!isTyping) {
+                // Obtém o delta atual e o novo conteúdo
                 const currentContents = quill.getContents();
                 const newContents = quill.clipboard.convert(textContent);
 
+                // Cria o delta com as diferenças
+                const delta = currentContents.diff(newContents);
 
-                if (JSON.stringify(currentContents) !== JSON.stringify(newContents)) {
+                // Verifica se há alguma diferença a ser aplicada
+                if (delta && delta.ops.length > 0) {
+                    // Armazena a posição atual do cursor
                     const currentCursorPosition = quill.getSelection();
 
-                    quill.setContents(newContents);
+                    // Aplica as diferenças (somente as mudanças necessárias)
+                    quill.updateContents(delta);
 
+                    // Restaura a posição do cursor, se existir
                     if (currentCursorPosition) {
                         quill.setSelection(currentCursorPosition.index);
                     }
